@@ -295,19 +295,6 @@ console.log("On-chain Status:", onchainCase?.status);
 
 ---
 
-## Status & Limitations
-
-- **Current Version**: `v0.1.0`
-- **Network Deployment**: **Stellar Testnet**
-- **Contract Address**: [`CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC)
-- **Security Status**: **Unaudited prototype**. Under active development. Do not use for production settlements with real capital without independent third-party smart contract and cryptography audits.
-- **Roadmap & Open Issues**:
-  - [StellarClear/stellarclear-app#2](https://github.com/StellarClear/stellarclear-app/issues/2): Real-time WebSocket event subscription stream for indexer.
-  - [StellarClear/stellarclear-contract#5](https://github.com/StellarClear/stellarclear-contract/issues/5): On-chain observer quorum threshold logic.
-  - [StellarClear/stellarclear-contract#6](https://github.com/StellarClear/stellarclear-contract/issues/6): On-chain dispute expiration TTL enforcement.
-
----
-
 ## Monorepo Structure
 
 ```text
