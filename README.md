@@ -168,7 +168,7 @@ The protocol maintains strict separation between private trade details and publi
 
 | Maintainer | Role | GitHub |
 | :--- | :--- | :--- |
-| **Oluwasegun Adejumo** | Lead Protocol Engineer | [@smog123](https://github.com/smog123) / [@Adejumo-2](https://github.com/Adejumo-2) |
+| **Smog and Adejumo** | Lead Protocol Engineer | [@smog123](https://github.com/smog123) / [@Adejumo-2](https://github.com/Adejumo-2) |
 
 ---
 
