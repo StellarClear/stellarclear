@@ -166,9 +166,9 @@ The protocol maintains strict separation between private trade details and publi
 
 ## Maintainers
 
-| Maintainer | Role | GitHub | Contact |
-| :--- | :--- | :--- | :--- |
-| **Oluwasegun Adejumo** | Lead Protocol Engineer | [@smog123](https://github.com/smog123) / [@Adejumo-2](https://github.com/Adejumo-2) | [Telegram (@adejumo)](https://t.me/adejumo) |
+| Maintainer | Role | GitHub |
+| :--- | :--- | :--- |
+| **Oluwasegun Adejumo** | Lead Protocol Engineer | [@smog123](https://github.com/smog123) / [@Adejumo-2](https://github.com/Adejumo-2) |
 
 ---
 
@@ -177,7 +177,6 @@ The protocol maintains strict separation between private trade details and publi
 - **GitHub Discussions**: [StellarClear Discussions](https://github.com/StellarClear/stellarclear/discussions)
 - **Issues & Roadmap**: [GitHub Issues](https://github.com/StellarClear/stellarclear/issues)
 - **Stellar Developers**: [Stellar Developer Discord](https://discord.gg/stellardev)
-- **Telegram**: [StellarClear Community](https://t.me/stellarclear)
 
 ---
 
