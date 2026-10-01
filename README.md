@@ -2,9 +2,9 @@
 
 <div align="center">
 
-<!-- Banner / Logo Placeholder -->
+<!-- Banner / Logo -->
 <p align="center">
-  <img src="assets/banner.png" alt="StellarClear Banner" width="100%" onerror="this.style.display='none'"/>
+  <img src="assets/banner.jpeg" alt="StellarClear Banner" width="100%"/>
 </p>
 
 [![CI](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml/badge.svg)](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml)
