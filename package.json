@@ -4,6 +4,14 @@
   "private": true,
   "type": "module",
   "description": "Open-source Stellar-native settlement evidence and reconciliation protocol",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StellarClear/stellarclear-app.git"
+  },
+  "homepage": "https://github.com/StellarClear/stellarclear-app#readme",
+  "bugs": {
+    "url": "https://github.com/StellarClear/stellarclear-app/issues"
+  },
   "workspaces": [
     "packages/schemas",
     "packages/proof",

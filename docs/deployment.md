@@ -76,7 +76,7 @@ OBSERVER_SECRET_KEY="SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
    ```
 
 5. **Generate TypeScript Monorepo Bindings**:
-   In `stellarclear` monorepo root:
+   In `stellarclear-app` monorepo root:
    ```bash
    SETTLEMENT_REGISTRY_WASM=/path/to/settlement_registry.wasm npm run generate:bindings
    ```

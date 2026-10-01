@@ -7,11 +7,11 @@
   <img src="assets/banner.jpeg" alt="StellarClear Banner" width="100%"/>
 </p>
 
-[![CI](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml/badge.svg)](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml)
+[![CI](https://github.com/StellarClear/stellarclear-app/actions/workflows/ci.yml/badge.svg)](https://github.com/StellarClear/stellarclear-app/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![Soroban](https://img.shields.io/badge/Soroban-v27.0-purple.svg)](https://stellar.org/soroban)
-[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/StellarClear/stellarclear/releases/tag/v0.1.0)
+[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/StellarClear/stellarclear-app/releases/tag/v0.1.0)
 
 <p align="center">
   <strong>Open-source Stellar-native settlement evidence and reconciliation protocol.</strong>
@@ -81,7 +81,7 @@ StellarClear combines high-throughput off-chain processing with tamper-evident o
 ## Monorepo Structure
 
 ```text
-stellarclear/
+stellarclear-app/
 ├── packages/
 │   ├── schemas/               # Protocol Zod schemas and TypeScript domain models
 │   ├── proof/                 # Canonical serialization and proof generator/verifier
@@ -109,8 +109,8 @@ stellarclear/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/StellarClear/stellarclear.git
-cd stellarclear
+git clone https://github.com/StellarClear/stellarclear-app.git
+cd stellarclear-app
 
 # 2. Install dependencies
 npm install
@@ -175,8 +175,8 @@ The protocol maintains strict separation between private trade details and publi
 
 ## Community & Discussions
 
-- **GitHub Discussions**: [StellarClear Discussions](https://github.com/StellarClear/stellarclear/discussions)
-- **Issues & Roadmap**: [GitHub Issues](https://github.com/StellarClear/stellarclear/issues)
+- **GitHub Discussions**: [StellarClear Discussions](https://github.com/StellarClear/stellarclear-app/discussions)
+- **Issues & Roadmap**: [GitHub Issues](https://github.com/StellarClear/stellarclear-app/issues)
 - **Stellar Developers**: [Stellar Developer Discord](https://discord.gg/stellardev)
 
 ---
@@ -191,8 +191,8 @@ Contributions are welcome! Please check our open issues and read [`CONTRIBUTING.
 
 Made with [contrib.rocks](https://contrib.rocks).
 
-<a href="https://github.com/StellarClear/stellarclear/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=StellarClear/stellarclear" alt="StellarClear Contributors" />
+<a href="https://github.com/StellarClear/stellarclear-app/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=StellarClear/stellarclear-app" alt="StellarClear Contributors" />
 </a>
 
 ---
