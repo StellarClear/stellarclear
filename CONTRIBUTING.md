@@ -1,6 +1,6 @@
 # Contributing to StellarClear
 
-Thanks for contributing — Wave contributors welcome.
+Thanks for contributing — all contributors welcome.
 
 ## Quick start
 
@@ -23,7 +23,7 @@ Copy `.env.example` to `.env` and set `STELLAR_CONTRACT_ID` to your testnet depl
 
 ## How to pick up an issue
 
-- Look for `good first issue` / `Stellar Wave` labels.
+- Look for `good first issue` / `help wanted` labels.
 - Comment to request assignment before starting work.
 - Keep PRs focused; one issue per PR.
 - Add/extend tests under `tests/` for behavior changes.
