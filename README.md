@@ -1,99 +1,137 @@
 # StellarClear
 
+<div align="center">
+
+<!-- Banner / Logo Placeholder -->
+<p align="center">
+  <img src="assets/banner.png" alt="StellarClear Banner" width="100%" onerror="this.style.display='none'"/>
+</p>
+
+[![CI](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml/badge.svg)](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![CI](https://github.com/StellarClear/stellarclear/actions/workflows/ci.yml/badge.svg)](./.github/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![Soroban](https://img.shields.io/badge/Soroban-v22-purple.svg)](https://soroban.stellar.org)
+[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/StellarClear/stellarclear/releases/tag/v0.1.0)
 
-StellarClear is an open-source, Stellar-native settlement evidence and reconciliation protocol.
+<p align="center">
+  <strong>Open-source Stellar-native settlement evidence and reconciliation protocol.</strong>
+</p>
 
-It compares:
-1. an expected settlement instruction, and
-2. an observed Stellar settlement transaction,
-
-then produces:
-- a deterministic match or break classification,
-- cryptographic commitments,
-- a Soroban on-chain settlement record,
-- multi-party attestations,
-- and an independently verifiable Settlement Proof.
-
-> The smart contract layer lives in [`StellarClear/stellarclear-contract`](https://github.com/StellarClear/stellarclear-contract) (`SettlementRegistry` Soroban contract). This monorepo consumes its generated TypeScript bindings via `packages/settlement-registry`.
+</div>
 
 ---
 
-## Documentation
+## Overview
 
-Comprehensive guides and technical documentation are available in the [`docs/`](./docs) directory:
+StellarClear provides cryptographic certainty and operational visibility for institutional and peer-to-peer financial settlements on the Stellar network.
 
-- [System Architecture](./docs/architecture.md) — Off-chain reconciliation, on-chain anchoring, and cryptographic proof pipeline.
-- [Settlement Lifecycle & Break Taxonomy](./docs/settlement-lifecycle.md) — State machine transitions, break classifications, dispute workflows, and finalization.
-- [Proof & Cryptographic Verification Guide](./docs/proof-verification.md) — Canonical commitments, offline verification, and live Soroban state verification.
-- [Soroban Smart Contract Integration](./docs/soroban-integration.md) — `SettlementRegistry` bindings, SDK operations, and event indexing.
-- [REST API Reference](./docs/api.md) — Endpoints, Zod schemas, request/response examples, and error model.
-- [Deployment & Setup Guide](./docs/deployment.md) — Soroban contract deployment, Postgres migrations, environment variables, and Docker.
-- [Operations & Monitoring Guide](./docs/operations.md) — Health/readiness probes, consistency checks, audit histories, and idempotency.
-- [Troubleshooting & Break Remediation](./docs/troubleshooting.md) — Break diagnoses, Soroban contract error codes, and indexer resynchronization.
-- [Integration Verification Guide](./docs/integration-verification.md) — Test suite layout, running live Soroban lifecycles, and verification procedures.
-- [Release Readiness Guide](./docs/release-readiness.md) — Pre-flight release checks, CI verification pipeline, and promotion checklist.
-- [Release Candidate Runbook](./docs/release-candidate-runbook.md) — Operational verification gates, health diagnostics, and incident playbooks.
-- [Production Release Procedure](./docs/production-release-procedure.md) — Production rollout sequence, WASM pinning, smoke tests, and rollback procedures.
+The protocol continuously compares:
+1. **Expected Settlement Instructions** (off-chain bilateral agreements, trade parameters, deadlines), and
+2. **Observed Stellar Transactions** (on-chain payments, ledger timestamps, asset transfers),
 
+and produces:
+- **Deterministic Reconciliation**: Automated match verification or precise break classification (asset mismatch, amount variance, destination routing errors, late settlements).
+- **Cryptographic Commitments**: SHA-256 canonical commitments binding off-chain terms to on-chain state without leaking confidential trade terms.
+- **On-Chain Soroban Anchoring**: Immutable settlement records in the `SettlementRegistry` contract.
+- **Multi-Party Attestation**: Digital confirmations from owners, counterparties, and independent observers.
+- **Portable Settlement Proofs**: Self-contained JSON-LD/schema proofs independently verifiable offline and against live Soroban state.
+
+> **Contract Layer**: The smart contract implementation is hosted in [`StellarClear/stellarclear-contract`](https://github.com/StellarClear/stellarclear-contract) (`SettlementRegistry`). This monorepo consumes generated TypeScript bindings in `packages/settlement-registry`.
 
 ---
 
-## Monorepo Architecture
+## Architecture
+
+StellarClear combines high-throughput off-chain processing with tamper-evident on-chain anchoring:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Off-Chain Layer                               │
+│  ┌───────────────────────┐       ┌───────────────────────────────────┐  │
+│  │   Private Trade Data  │       │         Matcher Engine            │  │
+│  │  (Expected & Observed)│ ───►  │  (Reconcile & Break Taxonomy)    │  │
+│  └───────────────────────┘       └─────────────────┬─────────────────┘  │
+│              │                                     │                    │
+│              ▼                                     ▼                    │
+│  ┌───────────────────────┐       ┌───────────────────────────────────┐  │
+│  │     Proof Engine      │       │            REST API               │  │
+│  │ (SHA-256 Commitments) │ ◄───► │   (Endpoints, Audit & Probes)     │  │
+│  └───────────────────────┘       └─────────────────┬─────────────────┘  │
+└────────────────────────────────────────────────────┼────────────────────┘
+                                                     │ Anchors & Verifies
+                                                     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       Stellar & Soroban On-Chain Layer                  │
+│  ┌──────────────────────────────┐     ┌──────────────────────────────┐  │
+│  │      SettlementRegistry      │     │      Streaming Indexer       │  │
+│  │  (Soroban Smart Contract)    │ ──► │  (Event Sync & Checkpoints)  │  │
+│  └──────────────────────────────┘     └──────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+- **API Service (`services/api`)**: Dispatcher providing REST endpoints for case creation, observation submissions, reconciliation, attestations, disputes, and diagnostic health checks.
+- **Matcher Service (`services/matcher`)**: Pure deterministic reconciliation engine performing exact decimal amount arithmetic and break code classification.
+- **Indexer Service (`services/indexer`)**: Streaming ledger ingestion service that decodes Soroban contract events and maintains durable checkpoints.
+- **Proof Package (`packages/proof`)**: Canonical deterministic JSON serialization and cryptographic commitment generation.
+- **Database Package (`packages/db`)**: Repository abstraction supporting PostgreSQL with strict idempotency and deduplication.
+- **Client SDK (`packages/sdk`)**: TypeScript client library with typed contract bindings, error normalization, and lifecycle helpers.
+
+---
+
+## Monorepo Structure
 
 ```text
 stellarclear/
-├── services/
-│   ├── api/                   # REST API service (Fastify-compatible dispatcher)
-│   ├── indexer/               # Durable Stellar & Soroban event ingestion service
-│   └── matcher/               # Settlement reconciliation engine
 ├── packages/
-│   ├── settlement-registry/   # Generated Soroban contract TypeScript bindings
-│   ├── sdk/                   # StellarClear TypeScript client SDK
-│   ├── schemas/               # Protocol Zod schemas and domain models
+│   ├── schemas/               # Protocol Zod schemas and TypeScript domain models
 │   ├── proof/                 # Canonical serialization and proof generator/verifier
-│   └── db/                    # Settlement persistence layer (Postgres & In-Memory)
-├── docs/                      # Technical documentation and specifications
-└── tests/                     # Unit and End-to-End integration tests
+│   ├── db/                    # Settlement persistence layer (PostgreSQL & In-Memory)
+│   ├── settlement-registry/   # Generated Soroban contract TypeScript bindings
+│   └── sdk/                   # StellarClear TypeScript client SDK
+├── services/
+│   ├── matcher/               # Deterministic settlement reconciliation engine
+│   ├── indexer/               # Durable Stellar & Soroban event ingestion service
+│   └── api/                   # REST API service (Fastify-compatible dispatcher)
+├── docs/                      # Technical architecture and operational specifications
+└── tests/                     # Unit, security, and live Soroban integration tests
 ```
 
 ---
 
-## Prerequisites
+## Quick Start
 
-- Node.js `>=22.12.0`
-- npm `>=10.0.0`
-- Stellar CLI (`stellar`)
-- Rust toolchain (for contract compilation in `stellarclear-contract`)
+### Prerequisites
+- **Node.js**: `>=22.12.0`
+- **npm**: `>=10.0.0`
+- **Stellar CLI**: (Optional, for contract deployment/bindings)
 
----
-
-## Setup & Installation
+### Installation & Build
 
 ```bash
-# 1. Install monorepo dependencies
+# 1. Clone the repository
+git clone https://github.com/StellarClear/stellarclear.git
+cd stellarclear
+
+# 2. Install dependencies
 npm install
 
-# 2. Generate TypeScript bindings from Soroban contract wasm (if rebuilding contracts)
-# Default expects ../stellarclear-contract checkout next to this repo.
-# Override with: SETTLEMENT_REGISTRY_WASM=/path/to/settlement_registry.wasm npm run generate:bindings
-npm run generate:bindings
-
-# 3. Build all packages and services
+# 3. Build all workspace packages and services
 npm run build
 
-# 4. Run full unit and integration test suite
+# 4. Run the full test suite (192+ tests)
 npm test
+```
 
-# Run modular test pipelines
+### Modular Test Pipelines
+
+```bash
 npm run test:unit         # Unit and contract release tests
-npm run test:api          # API endpoints & operational diagnostics
-npm run test:security     # Security & replay hardening regression tests
-npm run test:indexer      # Indexer & event synchronization
+npm run test:api          # API endpoints & operational health diagnostics
+npm run test:security     # Adversarial security & idempotency regression tests
+npm run test:indexer      # Indexer & event synchronization tests
 npm run test:integration  # Live Soroban contract integration tests
 
-# Run full pre-release verification
+# Run comprehensive 8-stage pre-release verification pipeline
 npm run verify:release
 ```
 
@@ -101,30 +139,64 @@ npm run verify:release
 
 ## Environment Configuration
 
-Copy `.env.example` to `.env` and fill in the required variables:
+Copy the example environment file to configure network and database connections:
 
 ```bash
 cp .env.example .env
 ```
 
-`STELLAR_CONTRACT_ID` must be set to your deployed `SettlementRegistry` contract address before running live testnet transactions.
+| Variable | Description | Default / Example |
+| :--- | :--- | :--- |
+| `STELLAR_NETWORK` | Target Stellar network | `testnet` |
+| `STELLAR_NETWORK_PASSPHRASE` | Network passphrase | `Test SDF Network ; September 2015` |
+| `STELLAR_RPC_URL` | Soroban RPC endpoint | `https://soroban-testnet.stellar.org` |
+| `STELLAR_CONTRACT_ID` | Deployed `SettlementRegistry` ID | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` |
+| `DATABASE_URL` | PostgreSQL connection URL | `postgresql://postgres:postgres@localhost:5432/stellarclear` |
+| `API_PORT` | REST API HTTP port | `3000` |
 
 ---
 
 ## Security & Privacy Boundary
 
-The protocol strictly separates private trade data from public on-chain records:
+The protocol maintains strict separation between private trade details and public ledger anchors:
 - **Private Data (Off-Chain)**: Trade references, exact counterparty information, payment descriptions, and internal bookkeeping details remain in private off-chain databases.
 - **Public Anchors (On-Chain)**: Only deterministic SHA-256 commitments (`termsCommitment`, `observationCommitment`, `resolutionCommitment`), Stellar transaction references, case lifecycle states, and participant attestations are written to Soroban.
 
 ---
 
+## Maintainers
+
+| Maintainer | Role | GitHub | Contact |
+| :--- | :--- | :--- | :--- |
+| **Oluwasegun Adejumo** | Lead Protocol Engineer | [@smog123](https://github.com/smog123) / [@Adejumo-2](https://github.com/Adejumo-2) | [Telegram (@adejumo)](https://t.me/adejumo) |
+
+---
+
+## Community & Discussions
+
+- **GitHub Discussions**: [StellarClear Discussions](https://github.com/StellarClear/stellarclear/discussions)
+- **Issues & Roadmap**: [GitHub Issues](https://github.com/StellarClear/stellarclear/issues)
+- **Stellar Developers**: [Stellar Developer Discord](https://discord.gg/stellardev)
+- **Telegram**: [StellarClear Community](https://t.me/stellarclear)
+
+---
+
 ## Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+Contributions are welcome! Please check our open issues and read [`CONTRIBUTING.md`](./CONTRIBUTING.md) for development workflows, branch naming, and pull request guidelines.
+
+---
+
+## Contributors
+
+Made with [contrib.rocks](https://contrib.rocks).
+
+<a href="https://github.com/StellarClear/stellarclear/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=StellarClear/stellarclear" alt="StellarClear Contributors" />
+</a>
 
 ---
 
 ## License
 
-Apache-2.0 — see [`LICENSE`](./LICENSE).
+Apache-2.0 — see [`LICENSE`](./LICENSE) for details.
