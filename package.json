@@ -33,11 +33,15 @@
     "test:indexer": "npm run build && tsc -p tests/tsconfig.json && node --test tests/dist/indexer*.test.js",
     "test:integration": "npm run build && tsc -p tests/tsconfig.json && node --test tests/dist/integration/**/*.test.js",
     "typecheck": "npm run --workspaces --if-present typecheck && tsc -p tests/tsconfig.json --noEmit",
+    "docs:dev": "vitepress dev docs-site",
+    "docs:build": "vitepress build docs-site",
+    "docs:preview": "vitepress preview docs-site",
     "verify:release": "bash scripts/release-check.sh",
     "generate:bindings": "stellar contract bindings typescript --wasm ${SETTLEMENT_REGISTRY_WASM:-../stellarclear-contract/target/wasm32v1-none/release/settlement_registry.wasm} --output-dir packages/settlement-registry --overwrite"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitepress": "^1.6.4"
   },
   "license": "Apache-2.0"
 }
