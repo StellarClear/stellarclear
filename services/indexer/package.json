@@ -17,6 +17,7 @@
     "src"
   ],
   "scripts": {
+    "start": "node dist/main.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },

@@ -15,3 +15,25 @@ declare module "node:assert/strict" {
   export function throws(fn: () => unknown, error?: unknown, message?: string): void;
   export function doesNotThrow(fn: () => unknown, message?: string): void;
 }
+
+declare module "node:http" {
+  export interface ClientRequest {
+    on(event: "error", listener: (err: Error) => void): this;
+  }
+  export interface IncomingMessage {
+    statusCode?: number;
+    on(event: "data", listener: (chunk: any) => void): this;
+    on(event: "end", listener: () => void): this;
+  }
+  export function get(
+    url: string | URL,
+    callback?: (res: IncomingMessage) => void
+  ): ClientRequest;
+}
+
+declare const process: {
+  env: Record<string, string | undefined>;
+  argv: string[];
+  exit(code?: number): never;
+  on(event: string, listener: (...args: any[]) => void): any;
+};

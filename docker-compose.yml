@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-stellarclear}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stellarclear_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-stellarclear_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stellarclear} -d ${POSTGRES_DB:-stellarclear_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  indexer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: ["node", "services/indexer/dist/main.js"]
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-stellarclear}:${POSTGRES_PASSWORD:-stellarclear_secret}@postgres:5432/${POSTGRES_DB:-stellarclear_db}
+      - STELLAR_NETWORK=${STELLAR_NETWORK:-testnet}
+      - STELLAR_NETWORK_PASSPHRASE=${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}
+      - STELLAR_RPC_URL=${STELLAR_RPC_URL:-https://soroban-testnet.stellar.org}
+      - STELLAR_CONTRACT_ID=${STELLAR_CONTRACT_ID:-CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: ["node", "services/api/dist/main.js"]
+    ports:
+      - "${API_PORT:-3000}:3000"
+    environment:
+      - API_PORT=3000
+      - API_HOST=0.0.0.0
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-stellarclear}:${POSTGRES_PASSWORD:-stellarclear_secret}@postgres:5432/${POSTGRES_DB:-stellarclear_db}
+      - STELLAR_NETWORK=${STELLAR_NETWORK:-testnet}
+      - STELLAR_NETWORK_PASSPHRASE=${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}
+      - STELLAR_RPC_URL=${STELLAR_RPC_URL:-https://soroban-testnet.stellar.org}
+      - STELLAR_CONTRACT_ID=${STELLAR_CONTRACT_ID:-CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC}
+      - ENABLE_ANCHORING=${ENABLE_ANCHORING:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'import(\"http\").then(h => h.get(\"http://localhost:3000/health\", res => process.exit(res.statusCode === 200 ? 0 : 1))).catch(() => process.exit(1))'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  pgdata:

@@ -111,68 +111,129 @@ StellarClear uses PostgreSQL for off-chain indexed data and private settlement m
 
 ### API Service
 ```bash
-npm run build
-node services/api/dist/index.js
+# Using root workspace script
+npm run start:api
+
+# Or directly in workspace
+npm run start --workspace=@stellarclear/api
 ```
 
 ### Ingestion Indexer Service
 ```bash
-node services/indexer/dist/index.js
+# Using root workspace script
+npm run start:indexer
+
+# Or directly in workspace
+npm run start --workspace=@stellarclear/indexer
 ```
 
 ---
 
 ## 6. Docker & Container Deployment
 
-StellarClear includes production-ready Dockerfile structures:
+StellarClear includes a multi-stage `Dockerfile` and a multi-service `docker-compose.yml` topology defining `postgres`, `indexer`, and `api` services:
 
+### Dockerfile
 ```dockerfile
-# Dockerfile
+# Multi-stage Docker build for StellarClear services
 FROM node:22-alpine AS builder
+
 WORKDIR /app
-COPY package*.json ./
+
+# Copy package manifests and TypeScript configurations
+COPY package*.json tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY services/ ./services/
-COPY tsconfig.base.json ./
+
+# Install dependencies and compile all packages & services
 RUN npm ci
 RUN npm run build
 
+# Production runner stage
 FROM node:22-alpine AS runner
+
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Copy compiled artifacts, node_modules, and manifests from builder
 COPY --from=builder /app ./
+
+# Default exposed port for API service
 EXPOSE 3000
-CMD ["node", "services/api/dist/index.js"]
+
+# Default command starts the REST API service
+CMD ["node", "services/api/dist/main.js"]
 ```
 
-Run with `docker-compose.yml`:
+### Docker Compose
+To run the full stack (Postgres + Indexer Worker + REST API):
+```bash
+docker compose up -d
+```
+
 ```yaml
-version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: stellarclear
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: stellarclear_db
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-stellarclear}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stellarclear_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-stellarclear_db}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stellarclear} -d ${POSTGRES_DB:-stellarclear_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  indexer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: ["node", "services/indexer/dist/main.js"]
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-stellarclear}:${POSTGRES_PASSWORD:-stellarclear_secret}@postgres:5432/${POSTGRES_DB:-stellarclear_db}
+      - STELLAR_NETWORK=${STELLAR_NETWORK:-testnet}
+      - STELLAR_NETWORK_PASSPHRASE=${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}
+      - STELLAR_RPC_URL=${STELLAR_RPC_URL:-https://soroban-testnet.stellar.org}
+      - STELLAR_CONTRACT_ID=${STELLAR_CONTRACT_ID:-CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: ["node", "services/api/dist/main.js"]
     ports:
-      - "3000:3000"
+      - "${API_PORT:-3000}:3000"
     environment:
-      - DATABASE_URL=postgres://stellarclear:password@postgres:5432/stellarclear_db
-      - STELLAR_RPC_URL=https://soroban-testnet.stellar.org
-      - STELLAR_NETWORK=testnet
+      - API_PORT=3000
+      - API_HOST=0.0.0.0
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-stellarclear}:${POSTGRES_PASSWORD:-stellarclear_secret}@postgres:5432/${POSTGRES_DB:-stellarclear_db}
+      - STELLAR_NETWORK=${STELLAR_NETWORK:-testnet}
+      - STELLAR_NETWORK_PASSPHRASE=${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}
+      - STELLAR_RPC_URL=${STELLAR_RPC_URL:-https://soroban-testnet.stellar.org}
+      - STELLAR_CONTRACT_ID=${STELLAR_CONTRACT_ID:-CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC}
+      - ENABLE_ANCHORING=${ENABLE_ANCHORING:-false}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'import(\"http\").then(h => h.get(\"http://localhost:3000/health\", res => process.exit(res.statusCode === 200 ? 0 : 1))).catch(() => process.exit(1))'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 volumes:
   pgdata:
+```
 
 ---
 
@@ -182,5 +243,3 @@ Before promoting builds to production staging or mainnet:
 1. Follow the verification gates in [Release Candidate Runbook](./release-candidate-runbook.md).
 2. Execute `npm run verify:release`.
 3. Inspect operational diagnostics at `GET /v1/operations/diagnostics`.
-
-```

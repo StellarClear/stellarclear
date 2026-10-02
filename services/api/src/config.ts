@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const ApiConfigSchema = z.object({
-  port: z.number().int().positive().default(3000),
+  port: z.number().int().min(0).default(3000),
   host: z.string().default("0.0.0.0"),
   network: z.string().default("testnet"),
   databaseUrl: z.string().min(1, "databaseUrl is required"),
@@ -53,7 +53,9 @@ export function validateProductionConfig(config: ApiConfig, isProduction: boolea
   };
 }
 
-export function loadApiConfigFromEnv(env: Record<string, string | undefined> = {}): ApiConfig {
+export function loadApiConfigFromEnv(
+  env: Record<string, string | undefined> = (typeof process !== "undefined" ? process.env : {})
+): ApiConfig {
   return ApiConfigSchema.parse({
     port: env["API_PORT"] ? parseInt(env["API_PORT"], 10) : 3000,
     host: env["API_HOST"] || "0.0.0.0",

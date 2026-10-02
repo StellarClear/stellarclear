@@ -23,6 +23,8 @@
     "services/api"
   ],
   "scripts": {
+    "start:api": "npm run start --workspace=@stellarclear/api",
+    "start:indexer": "npm run start --workspace=@stellarclear/indexer",
     "build": "npm run --workspaces --if-present build",
     "test": "npm run build && tsc -p tests/tsconfig.json && node --test tests/dist/*.test.js tests/dist/**/*.test.js",
     "test:unit": "npm run build && tsc -p tests/tsconfig.json && node --test tests/dist/schemas.test.js tests/dist/proof.test.js tests/dist/matcher.test.js tests/dist/db*.test.js tests/dist/sdk*.test.js tests/dist/settlement-registry.test.js tests/dist/contract_release.test.js",
