@@ -1,9 +1,8 @@
 import { defineConfig } from "vitepress";
-
 export default defineConfig({
   title: "StellarClear",
   description: "Open-source Stellar-native settlement evidence and reconciliation protocol.",
-  base: "/",
+  base: process.env.VITEPRESS_BASE || (process.env.GITHUB_ACTIONS ? "/stellarclear-app/" : "/"),
   cleanUrls: true,
   lastUpdated: true,
   themeConfig: {
